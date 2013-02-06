@@ -1,0 +1,5 @@
+#+title: Qute
+
+* Mission 
+  
+  A really simple, tiny, easy to use Javascript Object Library, based on Prototype OO based principles.  
