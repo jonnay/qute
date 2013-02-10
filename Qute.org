@@ -1,6 +1,54 @@
 #+Title: Qute
 
-* Qute, the cutest little Javascript object system around!
+* Using Qute 
+
+** Simplest thing to do:  Beget objects
+
+   This is from Crockfords definition of beget.[fn:1]  Beget will 
+
+
+* Qon2Dom (Quasi-Useful) Usage Example
+
+#+begin_src js :tangle qon2dom.js
+  Qon2Dom = Qute.extend({
+      children: [],
+      domReady:  function() {
+          for(i=0; i< this.children.length; i++) {
+              if (typeof this.children[i]["init"] == "function") {
+                  this.children[i].init();
+              } else {
+                  throw "Cannot call init";
+              }
+          }
+      },
+      beget: function() {
+          var o = Qute.beget(this);
+          Qon2Dom.children.push(o);
+          return o;
+      },
+      init: function() {}
+  });
+#+end_src
+ 
+  
+* Tiqle a really tiny pubsub implementation.
+
+  - Consider hooking into objects directly...?
+  - subscribe functions receive an event-type object rather than arguments directly. 
+
+** Spec
+   
+   - It should accept multiple subscriptions and run them in order
+   - it should not mess around with "this" binding at all.
+   - It should have proper specs around bind 
+#+begin_src js
+
+#+end_src
+
+
+
+
+* Hacking Qute 
 
 ** Base Object: Qute
 
@@ -12,13 +60,27 @@
           var o = new F();  // valid use of the new keyword here      
           return o;
       },
-      extend: function(from) {
+      extend: function(from) {  
           var o = this.beget();
           
           for (var prop in from) { 
               o[prop] = from[prop];
           }
           return o; 
+      },
+      bindThis: function(method) {
+          // degenerate definition for now
+          // should probably use a single-eval bound in an anon function
+  
+          if (typeof method["bind"] == "function") {
+              return method.bind(this);
+          } else {
+              var self = this;
+              return function() {
+                  var args = Array.prototype.slice.call(arguments);
+                  return method.apply(self, arguments);
+              }
+          }
       },
       quacksLike: function(duck) {
           var quacks = true;
@@ -45,4 +107,10 @@
 
 *** TODO borrow ... figure out syntax
 
-*** TODO proper testing 
+*** TODO proper testing
+
+
+* Footnotes
+
+[fn:1] http://javascript.crockford.com/prototypal.html
+ 
