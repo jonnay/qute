@@ -4,11 +4,85 @@
 
 ** Simplest thing to do:  Beget objects
 
-   This is from Crockfords definition of beget.[fn:1]  Beget will 
+   This is from Crockfords definition of beget.[fn:1]  Beget will create a new object using the old object as its prototype.
+
+#begin_src js :tangle no
+var newObj = Qute.beget();
+var newerObj = newObj.beget();
+#+end_src
+
+   ~newObj~ has the ~Qute~ object as its prototype, and ~newerObj~ has ~newObj~ and therefore ~Qute~ as it's prototype. 
+
+** Extending objects with Extend
+
+   In most cases you'll want to extend an object in the process of creating it.  This is done with the extend method:
+
+#+begin_src js :tangle no
+  var lawOfFives = Qute.extend({
+      num: 5,
+      why: "2 + 3 is 5.  It's the law of 5s!",
+      printAwesomeNumber: function() {
+          console.log (num+" is AWESOME.  Why?"+why);
+      }
+  });
+  
+  var skidoo = lawOfFives.extend({
+      num: 6,
+      why: "2 * 3 is 6." 
+  });
+    
+  var powadoo = lawOfFives.extend({
+      num: 8,
+      why: "2 ^ 3 is 8." 
+  });
+#+end_src
+
+** Rebinding -- or, how to avoid eating shit sandwiches.
+
+   Sometimes you just have to eat shit... err.. use a Javascript
+   library that binds this willy-nilly.  That sucks.  ~rebind~ lets
+   you make sure that "this" says true to the current object, so you
+   don't have to worry about errant event handlers.
+
+#+begin_src js :tangle no
+  var SomeHandlerObj = Qute.extend({
+      init: function() {
+          $poop('someDomSelector').on('click',this.rebind(this.click));
+          $poop('someDomSelector').on('mouseEnter', this.rebind("enter"));
+      },  
+      click: function(e) {
+          this.doStuff(e.target);
+      },
+      enter: function(e) {
+          this.doStuff("STUFF!");
+      }
+      doStuff: function(things) {
+          // ... etc ...
+      }
+  });
+#+end_src
+
+   The first syntax shows using rebind by passing in an arbitrary
+   function.  A new function will be returned that will do stuff with
+   the target...sorry...that willexecute the "click" function defined
+   int he SomeHandlerObj with ~this~ bound to the SomeHandlerObj.  If
+   you tried to define your handler without the rebind, the call
+   ~this.doStufff~ would likely fail, as the $poop library likes to
+   rebind ~this~.
+
+   You can pass in any function that you want to rebind.  This would
+   allow you to borrow methods from other functions, and makes for
+   some interesting programming techniques. Try not to get too
+   interesting however.
+
+   Note, there already is a function in ECMA script that does what
+   ~rebind~ does--unsurprisingly called ~bind~.  ~rebind~ is provided
+   for compatibility.
+
 
 
 * Qon2Dom (Quasi-Useful) Usage Example
-
+** Status: Working, but needs more work.
 #+begin_src js :tangle qon2dom.js
   Qon2Dom = Qute.extend({
       children: [],
@@ -30,28 +104,15 @@
   });
 #+end_src
  
-  
-* Tiqle a really tiny pubsub implementation.
-
-  - Consider hooking into objects directly...?
-  - subscribe functions receive an event-type object rather than arguments directly. 
-
-** Spec
-   
-   - It should accept multiple subscriptions and run them in order
-   - it should not mess around with "this" binding at all.
-   - It should have proper specs around bind 
-#+begin_src js
-
-#+end_src
-
-
-
 
 * Hacking Qute 
 
-** Base Object: Qute
+** TODO namespace!
 
+** Base Object: Qute
+*** TODO split this out using noweb
+*** TODO when Function.bind is not available, it should work better. 
+*** TODO extend should take an optional init function, rebind this, and execute it on completion.
 #+begin_src js :tangle qute.js
   Qute = {
       beget: function() {
@@ -68,9 +129,14 @@
           }
           return o; 
       },
-      bindThis: function(method) {
-          // degenerate definition for now
-          // should probably use a single-eval bound in an anon function
+      rebind: function(method) {
+          if (typeof method == "string") {
+              if (typeof this[method] == "function") {
+                  method = this[method];
+              } else {
+                  throw "Cannot rebind "+method+".  Not bound to the current object.";
+              }
+          }
   
           if (typeof method["bind"] == "function") {
               return method.bind(this);

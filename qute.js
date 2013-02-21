@@ -18,6 +18,14 @@ Qute = {
         // degenerate definition for now
         // should probably use a single-eval bound in an anon function
 
+        if (typeof method == "string") {
+            if (typeof this[method] == "function") {
+                method = this["method"];
+            } else {
+                throw "Cannot rebind "+method+".  Not bound to object.";
+            }
+        }
+
         if (typeof method["bind"] == "function") {
             return method.bind(this);
         } else {

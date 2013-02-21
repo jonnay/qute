@@ -1,0 +1,15 @@
+#+title: Tiqle
+
+* Tiqle a really tiny pubsub implementation.
+** Status:  Just vague ideas
+  - Consider hooking into objects directly...?
+  - subscribe functions receive an event-type object rather than arguments directly. 
+
+** Spec
+   
+   - It should accept multiple subscriptions and run them in order
+   - it should not mess around with "this" binding at all.
+   - It should have proper specs around bind 
+#+begin_src js
+
+#+end_src

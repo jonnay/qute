@@ -1,0 +1,56 @@
+#+til
+* Aspeqt, the lispy Qute Aspect Oriented 'System'
+
+  This should be a simple, composeable AOP system.  Right now it meets 1 of the 2 goals.
+
+  To meet the 2nd goal (composable) the following should work:
+
+  - before advice against all function members of an object to call console.log 
+  - before advice against a particular function that alters incoming arguments
+
+  Oh yea, and a weaving system.
+
+* Status: in progress
+
+* Basic implementation
+
+#+begin_src js :tangle aspeqt.js
+  Aspeqt = Qute.extend({
+      before: function(beforeF, F) {
+          return function() {
+              var args = beforeF.apply(null, this.arguments);
+              F.apply(null, args);
+          };
+      },
+      after: function(afterF, F) {
+          return function() {
+              return afterF.call(null, F.apply(null, this.arguments));
+          };
+      }
+      around: function(beforeF, afterF, F)
+      {
+          return Devious.AOP.Before(beforeF, Devious.AOP.after(afterF, F));
+      }
+  });
+#+end_src 
+
+* Old documentation and tests. 
+
+#+begin_src js
+
+Devious.AOP.before.doc  = "Wrap the function around in before advice.\n";
+Devious.AOP.before.doc += "The Before advice should be a function that returns an array of arguments passed to its wrapping target.\n"
+Devious.AOP.before.doc += "Note that this wrapping doesn't strictly add advice to the function, it mearly returns a function that performs the before half of the equation.";
+
+
+Devious.AOP.after.doc  = "Wrap the function around in after Advice.\n";
+Devious.AOP.after.doc += "The after advice receives one parameter (the result from the original function) and should return the new return value.";
+
+
+	var called = false;
+	var callCheck = function() {
+		called = true;
+		return callCheck.arguments;
+	};
+
+#+end_src
