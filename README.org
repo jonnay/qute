@@ -4,3 +4,10 @@
   
   A really simple, tiny, easy to use Javascript Object Library, based on Prototype OO based principles.  
 
+* Changelog
+
+  - v 0.1
+  - v 0.2 
+    - Hashed out a BUNCH of documentation
+    - changed bindThis to rebind, added string argument
+    - added Aspeqt, and Tiqle.  They're just ideas for now
