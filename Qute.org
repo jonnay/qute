@@ -37,6 +37,31 @@ var newerObj = newObj.beget();
   });
 #+end_src
 
+   You can also pass multiple objects to extend.  Properties take precidence according to argument order, so for example:
+
+#+begin_src js tangle: no
+  
+  var A = Qute.extend({
+      a: 5,
+      b: 6,
+      c: 8
+  });
+  
+  
+  var B = A.extend({ a: 8}, { a: 7, z: 8}, {a: 9, w: 23, z: 88});
+  
+  console.log(B);
+  /* -->
+     {
+       a: 8,
+       b: 6,
+       c: 8,
+       w: 23
+       z: 8
+     }
+  ,*/
+#+end_src
+
 ** Rebinding -- or, how to avoid eating shit sandwiches.
 
    Sometimes you just have to eat shit... err.. use a Javascript
@@ -121,11 +146,14 @@ var newerObj = newObj.beget();
           var o = new F();  // valid use of the new keyword here      
           return o;
       },
-      extend: function(from) {  
+      extend: function() {  
           var o = this.beget();
           
-          for (var prop in from) { 
-              o[prop] = from[prop];
+          for (var i = arguments.length - 1; i >= 0; i--) {
+              var from = arguments[i];
+              for (var prop in from) { 
+                  o[prop] = from[prop];
+              }
           }
           return o; 
       },

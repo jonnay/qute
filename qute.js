@@ -6,23 +6,23 @@ Qute = {
         var o = new F();  // valid use of the new keyword here      
         return o;
     },
-    extend: function(from) {  
+    extend: function() {  
         var o = this.beget();
         
-        for (var prop in from) { 
-            o[prop] = from[prop];
+        for (var i = arguments.length - 1; i >= 0; i--) {
+            var from = arguments[i];
+            for (var prop in from) { 
+                o[prop] = from[prop];
+            }
         }
         return o; 
     },
-    bindThis: function(method) {
-        // degenerate definition for now
-        // should probably use a single-eval bound in an anon function
-
+    rebind: function(method) {
         if (typeof method == "string") {
             if (typeof this[method] == "function") {
-                method = this["method"];
+                method = this[method];
             } else {
-                throw "Cannot rebind "+method+".  Not bound to object.";
+                throw "Cannot rebind "+method+".  Not bound to the current object.";
             }
         }
 
