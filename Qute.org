@@ -154,7 +154,74 @@ Note, this is kinda poopy because if Qon2Dom is loaded before jQuery, it won't t
 ** Base Object: Qute
 *** TODO split this out using noweb
 *** TODO when Function.bind is not available, it should work better. 
+**** bind definition from underscore.
+
+	 I've un-shitified the code.  This is for illustrative purposes; we're not saving bytes, so lets format it good.
+
+	      Underscore.js 1.4.4
+          http://underscorejs.org/
+          (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
+          Underscore may be freely distributed under the MIT license.
+
+***** Documentation:
+	  bind_.bind(function, object, [*arguments]) 
+	  
+	  Bind a function to an object, meaning that whenever the function is called, the value of this will be the object. Optionally, pass arguments to the function to pre-fill them, also known as partial application.
+
+	  #+begin_src js :tangle no
+        var func = function(greeting) { 
+            return greeting + ': ' + this.name 
+        };
+        func = _.bind(func, {name : 'moe'}, 'hi');
+        func();   // => 'hi: moe'
+	  #+end_src
+
+**** Code
+#+begin_src js :tangle no
+  
+  var FuncProto  = Function.prototype;
+  var nativeBind = FuncProto.bind;
+  
+  // Reusable constructor function for prototype setting.
+  var ctor = function(){};
+  
+  _.bind = function(func, context) {
+      var args, bound;
+      if (func.bind === nativeBind && nativeBind) {
+          return nativeBind.apply(func, slice.call(arguments, 1));
+      }
+          
+      if (!_.isFunction(func)) {
+          throw new TypeError;
+      }
+      
+      args = slice.call(arguments, 2);
+      
+      return bound = function() {
+          if (!(this instanceof bound)) {
+              return func.apply(context, args.concat(slice.call(arguments)));
+          }
+  
+          ctor.prototype = func.prototype;
+          var self = new ctor;
+          ctor.prototype = null;
+  
+          var result = func.apply(self, args.concat(slice.call(arguments)));
+          if (Object(result) === result) {
+              return result;
+          }
+          return self;
+      };
+  };
+#+end_src
 *** TODO extend should take an optional init function, rebind this, and execute it on completion.
+	Note, because of a decision to allow multiple extend objects, getting the interface right for this will be important!
+
+**** double underscore __construct  ocnstructors?
+	 - problem :: very php... is double underscore reserved in js?
+**** base it on type
+	 - problem :: not very slick.  What happens when you pass in a Function object that you just wand to ad to the extensions?
+
 #+begin_src js :tangle qute.js
   Qute = {
       beget: function() {
@@ -179,7 +246,7 @@ Note, this is kinda poopy because if Qon2Dom is loaded before jQuery, it won't t
               if (typeof this[method] == "function") {
                   method = this[method];
               } else {
-                  throw "Cannot rebind "+method+".  Not bound to the current object.";
+                  throw new TypeError("Cannot rebind "+method+".  It is not a function or not a field of hte current object.");
               }
           }
   
