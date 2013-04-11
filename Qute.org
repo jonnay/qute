@@ -107,6 +107,9 @@ var newerObj = newObj.beget();
 
 
 * Qon2Dom (Quasi-Useful) Usage Example
+
+** TODO add support for a single dom linked item, or a full component of many dom links
+
 ** Status: Working, but needs more work.
 #+begin_src js :tangle qon2dom.js
   Qon2Dom = Qute.extend({
@@ -127,8 +130,22 @@ var newerObj = newObj.beget();
       },
       init: function() {}
   });
+
 #+end_src
- 
+
+** TODO if no jquery is available, then attach an event the old school way.
+Note, this is kinda poopy because if Qon2Dom is loaded before jQuery, it won't trigger init.
+
+#+begin_src js :tangle qon2dom.js
+  if (typeOf jQuery === "function") {
+      jQuery(function() { Qon2Dom.domReady(); });
+  } else {
+      throw "Qon2Dom needs to be loaded after jQuery"
+  }
+#+end_src 
+
+** TODO Add the ability to add our own post-dom handlers so you can **live gloriously**  without jQuery
+** TODO Look at how these could be combined into larger components
 
 * Hacking Qute 
 
